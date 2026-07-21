@@ -1,39 +1,26 @@
+from uuid import UUID
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.repositories.ticket_repository import TicketRepository
 from app.schemas.ticket import TicketCreate, TicketUpdate
 
-tickets = {}
-ticket_count = 1
+
 class TicketService:
-    @staticmethod
-    def create_ticket(ticket: TicketCreate):
-        global ticket_count
-        new_ticket = {
-            "id" : ticket_count,
-            "title" : ticket.title,
-            "description" : ticket.description,
-            "priority" : ticket.priority,
-            "status" : "Open",
-        }
-        tickets[ticket_count] = new_ticket
-        ticket_count+=1
-        return new_ticket
-    
-    @staticmethod
-    def get_all_ticket():
-        return list(tickets.values())
-    
-    @staticmethod
-    def get_ticket(ticket_id: int):
-        return tickets.get(ticket_id)
-    
-    @staticmethod
-    def update_ticket(ticket_id: int, ticket: TicketUpdate):
-        exist = tickets.get(ticket_id)
-        if not exist:
-            return None
-        update_data = ticket.model_dump(exclude_unset=True)
-        exist.update(update_data)
-        return exist
-    
-    @staticmethod
-    def delete_ticket(ticket_id: int):
-        return tickets.pop(ticket_id, None)
+    def __init__(self, db: AsyncSession):
+        self.repository = TicketRepository(db)
+
+    async def create_ticket(self, ticket: TicketCreate):
+        return await self.repository.create(ticket)
+
+    async def get_all_ticket(self):
+        return await self.repository.get_all()
+
+    async def get_ticket(self, ticket_id: UUID):
+        return await self.repository.get(ticket_id)
+
+    async def update_ticket(self, ticket_id: UUID, ticket: TicketUpdate):
+        return await self.repository.update(ticket_id, ticket)
+
+    async def delete_ticket(self, ticket_id: UUID):
+        return await self.repository.delete(ticket_id)

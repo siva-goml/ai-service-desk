@@ -1,36 +1,44 @@
-from fastapi import APIRouter, HTTPException
+from uuid import UUID
 
-from app.schemas.ticket import TicketCreate, TicketUpdate, Ticket
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.deps import get_db
+from app.schemas.ticket import TicketResponse, TicketCreate, TicketUpdate
 from app.services.ticket_service import TicketService
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
 
-@router.post("/", response_model=Ticket)
-def create_ticket(ticket: TicketCreate):
-    return TicketService.create_ticket(ticket)
 
-@router.get("/", response_model=list[Ticket])
-def get_all_tickets():
-    return TicketService.get_all_ticket()
+@router.post("/", response_model=TicketResponse, status_code=status.HTTP_201_CREATED)
+async def create_ticket(ticket: TicketCreate, db: AsyncSession = Depends(get_db)):
+    return await TicketService(db).create_ticket(ticket)
 
-@router.get("/{ticket_id}", response_model=Ticket)
-def get_ticket(ticket_id: int):
-    ticket = TicketService.get_ticket(ticket_id)
+
+@router.get("/", response_model=list[TicketResponse])
+async def get_all_tickets(db: AsyncSession = Depends(get_db)):
+    return await TicketService(db).get_all_ticket()
+
+
+@router.get("/{ticket_id}", response_model=TicketResponse)
+async def get_ticket(ticket_id: UUID, db: AsyncSession = Depends(get_db)):
+    ticket = await TicketService(db).get_ticket(ticket_id)
     if ticket is None:
         raise HTTPException(status_code=404, detail="Ticket not found")
     return ticket
 
-@router.put("/{ticket_id}", response_model=Ticket)
-def update_ticket(ticket_id: int, ticket: TicketUpdate):
-    updated = TicketService.update_ticket(ticket_id, ticket)
+
+@router.put("/{ticket_id}", response_model=TicketResponse)
+async def update_ticket(ticket_id: UUID, ticket: TicketUpdate, db: AsyncSession = Depends(get_db)):
+    updated = await TicketService(db).update_ticket(ticket_id, ticket)
     if updated is None:
         raise HTTPException(status_code=404, detail="Ticket not found")
     return updated
 
-@router.delete("/{ticket_id}")
-def delete(ticket_id: int):
-    remove = TicketService.delete_ticket(ticket_id)
+
+@router.delete("/{ticket_id}", status_code=status.HTTP_200_OK)
+async def delete(ticket_id: UUID, db: AsyncSession = Depends(get_db)):
+    remove = await TicketService(db).delete_ticket(ticket_id)
     if remove is None:
         raise HTTPException(status_code=404, detail="Ticket not found")
     return {"message": "Ticket deleted successfully"}
-
