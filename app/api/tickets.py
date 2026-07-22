@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import get_db
 from app.schemas.ticket import TicketResponse, TicketCreate, TicketUpdate
-from app.services.ticket_service import TicketService
+from app.services.ticket_service import TicketService, TicketNotFoundError, ClosedTicketError
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
 
@@ -30,15 +30,18 @@ async def get_ticket(ticket_id: UUID, db: AsyncSession = Depends(get_db)):
 
 @router.put("/{ticket_id}", response_model=TicketResponse)
 async def update_ticket(ticket_id: UUID, ticket: TicketUpdate, db: AsyncSession = Depends(get_db)):
-    updated = await TicketService(db).update_ticket(ticket_id, ticket)
-    if updated is None:
+    try:
+        return await TicketService(db).update_ticket(ticket_id, ticket)
+    except TicketNotFoundError:
         raise HTTPException(status_code=404, detail="Ticket not found")
-    return updated
+    except ClosedTicketError:
+        raise HTTPException(status_code=400, detail="Closed tickets cannot be updated")
 
 
 @router.delete("/{ticket_id}", status_code=status.HTTP_200_OK)
 async def delete(ticket_id: UUID, db: AsyncSession = Depends(get_db)):
-    remove = await TicketService(db).delete_ticket(ticket_id)
-    if remove is None:
+    try:
+        await TicketService(db).delete_ticket(ticket_id)
+    except TicketNotFoundError:
         raise HTTPException(status_code=404, detail="Ticket not found")
     return {"message": "Ticket deleted successfully"}
