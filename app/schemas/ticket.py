@@ -19,12 +19,12 @@ class TicketUpdate(BaseModel):
     priority: Optional[Priority] = None
     status: Optional[Status] = None
 
-
 class TicketResponse(BaseModel):
     id: UUID
     title: str
     description: str
     priority: Priority
+    # assignee_email: Optional[str] = None
     status: Status
     created_at: datetime
     updated_at: datetime
