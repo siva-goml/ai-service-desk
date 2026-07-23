@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.ticket import Priority, Status
 
@@ -31,3 +31,11 @@ class TicketResponse(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class SummarizeRequest(BaseModel):
+    ticket_description: str = Field(min_length=10, max_length=5_000)
+ 
+ 
+class SummarizeResponse(BaseModel):
+    summary: str
+    suggested_response: str
