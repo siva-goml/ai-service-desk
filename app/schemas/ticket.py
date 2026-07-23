@@ -8,10 +8,13 @@ from app.models.ticket import Priority, Status
 
 
 class TicketCreate(BaseModel):
-    title: str
-    description: str
+    model_config = ConfigDict(
+       str_strip_whitespace=True
+    )
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str = Field(..., min_length=1, max_length=5000)
     priority: Priority = Priority.MEDIUM
-    assignee_email: Optional[str]
+    assignee_email: Optional[str] = None
 
 
 class TicketUpdate(BaseModel):
@@ -25,7 +28,7 @@ class TicketResponse(BaseModel):
     title: str
     description: str
     priority: Priority
-    # assignee_email: Optional[str] = None
+    assignee_email: Optional[str] = None
     status: Status
     created_at: datetime
     updated_at: datetime
