@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 
 from app.api.tickets import router as ticket_router
-from app.db.base import Base
+from app.api.ai import router as ai_router
 from app.db.database import engine
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,7 +39,6 @@ async def add_response_time(request: Request, call_next,):
     response = await call_next(request)
     elapsed_ms = round((time.perf_counter() - start_time) * 1000, 2,)
     response.headers["X-Response-Time"] = f"{elapsed_ms}ms"
-    print(response)
     return response
  
  
@@ -66,3 +65,4 @@ async def readiness_check():
         )
 
 app.include_router(ticket_router)
+app.include_router(ai_router)
