@@ -11,6 +11,7 @@ class TicketCreate(BaseModel):
     title: str
     description: str
     priority: Priority = Priority.MEDIUM
+    assignee_email: Optional[str]
 
 
 class TicketUpdate(BaseModel):
