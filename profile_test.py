@@ -14,9 +14,6 @@ async def test_crud():
 
         service = TicketService(db)
 
-        # ==========================================
-        # 1. CREATE TICKET
-        # ==========================================
         print("\n1. Creating ticket...")
 
         create_data = TicketCreate(
@@ -32,9 +29,6 @@ async def test_crud():
         ticket_id = created_ticket.id
 
 
-        # ==========================================
-        # 2. GET ALL TICKETS
-        # ==========================================
         print("\n2. Getting all tickets...")
 
         tickets = await service.get_all_ticket()
@@ -42,9 +36,6 @@ async def test_crud():
         print("Total tickets:", len(tickets))
 
 
-        # ==========================================
-        # 3. GET SINGLE TICKET
-        # ==========================================
         print("\n3. Getting single ticket...")
 
         ticket = await service.get_ticket(ticket_id)
