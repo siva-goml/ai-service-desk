@@ -7,7 +7,7 @@ from typing import Any
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
  
-from app.services.prompt_templates import TICKET_SUMMARY_V1
+from app.services.aws_service.prompt_templates import TICKET_SUMMARY_V1
 from app.core.config import settings
  
 class BedrockServiceError(RuntimeError):
